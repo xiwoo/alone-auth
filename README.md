@@ -14,16 +14,16 @@
 
 ```yaml
 app:
-	auth:
-		token-secret: (jwt token secret code)
-		token-expiration-msec: (jwt token set time)
-	oauth2:
-		# After successfully authenticating with the OAuth2 Provider,
-		# we'll be generating an auth token for the user and sending the token to the
-		# redirectUri mentioned by the frontend client in the /oauth2/authorize request.
-		# We're not using cookies because they won't work well in mobile clients.
-		authorized-redirect-uris:
-		  - (모든 인증/인가 후 front쪽으로 redirect할 주소)
+  auth:
+    token-secret: (jwt token secret code)
+    token-expiration-msec: (jwt token set time)
+  oauth2:
+    # After successfully authenticating with the OAuth2 Provider,
+    # we'll be generating an auth token for the user and sending the token to the
+    # redirectUri mentioned by the frontend client in the /oauth2/authorize request.
+    # We're not using cookies because they won't work well in mobile clients.
+    authorized-redirect-uris:
+      - (모든 인증/인가 후 front쪽으로 redirect할 주소)
 ```
 
 ### application-oauth2.yml
@@ -34,7 +34,7 @@ spring:
     oauth2:
       client:
         registration:
-					#registrationId
+          #registrationId
           google:
             client-id: (google client id)
             client-secret: (google client secret code)
@@ -65,7 +65,7 @@ spring:
             client-authentication-method: POST
             client-name: kakao
 
-				#global하지 않아서인지 naver, kakao는 provider 설정 필요
+        #global하지 않아서인지 naver, kakao는 provider 설정 필요
         provider:
           naver:
             authorization-uri: https://nid.naver.com/oauth2.0/authorize
