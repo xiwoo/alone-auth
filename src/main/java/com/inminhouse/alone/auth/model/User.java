@@ -21,7 +21,7 @@ import net.minidev.json.annotate.JsonIgnore;
 @Setter
 @Entity
 @Table(name="users", uniqueConstraints= {
-	@UniqueConstraint(columnNames="email")
+	@UniqueConstraint(columnNames="id")
 })
 @ToString
 public class User {
@@ -34,7 +34,7 @@ public class User {
 	private String name;
 	
 	@Email
-	@Column(nullable = false)
+//	@Column(nullable = false)
 	private String email;
 	
 	private String imageUrl;

@@ -32,6 +32,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	private UserRepository userRepository;
 
 	private static final Marker MESSAGE_MARKER = MarkerFactory.getMarker("MESSAGE");
+	private static final Marker DEBUG_MARKER = MarkerFactory.getMarker("DEBUG");
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomOAuth2UserService.class);
 
 	@Override
@@ -52,19 +53,32 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	//기존 등록된 user이면 user update
 	//없으면 user register
 	private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {
+
+		String key = oAuth2UserRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 		
 		OAuth2UserInfo oAuth2UserInfo = 
 			OAuth2UserInfoFactory.getOAuth2UserInfo(
 				oAuth2UserRequest.getClientRegistration().getRegistrationId(), 
-				oAuth2User.getAttributes()
+				oAuth2User.getAttributes(),
+				key
 			);
 		
-		if(StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
-			throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
+		Optional<User> userOptional;
+		
+		LOGGER.debug(DEBUG_MARKER, "id:: {}", oAuth2UserInfo.getId());
+		LOGGER.debug(DEBUG_MARKER, "email:: {}", oAuth2UserInfo.getEmail());
+		
+		if(oAuth2UserRequest.getClientRegistration().getRegistrationId().equals("kakao")) {
+			userOptional = userRepository.findById(Long.parseLong(oAuth2UserInfo.getId()));
+		} else {
+			if(StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
+				throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
+			}
+			userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
 		}
 		
 		//해당 email 조회 결과로 기존 유저인지 신규유저인지 판단
-        Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
+//        Optional<User> 
         
         User user;
         UserStatus status;
@@ -72,7 +86,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if(userOptional.isPresent()) {//값이 있으면 > user값 userInfo에서 값 꺼내서 user update
         	
         	user = userOptional.get();
-        	if(!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {
+        	if(!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId().toUpperCase()))) {
                 throw new OAuth2AuthenticationProcessingException(
             		"Looks like you're signed up with " +
                     user.getProvider() + " account. Please use your " + user.getProvider() +
@@ -94,7 +108,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	
 	private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
 		User user = new User();
-		user.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
+		user.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId().toUpperCase()));
 		user.setProviderId(oAuth2UserInfo.getId());
         user.setName(oAuth2UserInfo.getName());
         user.setEmail(oAuth2UserInfo.getEmail());

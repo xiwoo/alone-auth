@@ -8,10 +8,10 @@ import com.inminhouse.alone.auth.config.AppProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties(AppProperties.class)
-public class Alone3Application {
+public class AloneAuthApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Alone3Application.class, args);
+		SpringApplication.run(AloneAuthApplication.class, args);
 	}
 	
 }
