@@ -18,6 +18,8 @@ import com.inminhouse.alone.auth.config.security.utils.CookieUtils;
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
+	private static final String QUERYPARAM_ERROR = "error";
+	
     @Autowired
     HttpCookieAuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
@@ -30,12 +32,14 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
     	logger.error("EXCEPTION:: ", exception);
     	
         String targetUrl = CookieUtils.getCookie(request, HttpCookieAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
-                .map(Cookie::getValue)
-                .orElse(("/"));
+            .map(Cookie::getValue)
+            .orElse(("/"));
+        
+        //Exception에 따른 error 메세지 처리 필요
 
         targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
-                .queryParam("error", exception.getLocalizedMessage())
-                .build().toUriString();
+            .queryParam(QUERYPARAM_ERROR, exception.getLocalizedMessage())
+            .build().toUriString();
 
         httpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
 

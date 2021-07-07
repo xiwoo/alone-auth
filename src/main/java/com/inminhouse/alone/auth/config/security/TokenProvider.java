@@ -3,9 +3,6 @@ package com.inminhouse.alone.auth.config.security;
 
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.inminhouse.alone.auth.config.AppProperties;
@@ -17,13 +14,15 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class TokenProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
-    
     private AppProperties appProperties;
+    
+    private static final String CLAIM_KEY = "provider";
     
     public TokenProvider(AppProperties appProperties) {
         this.appProperties = appProperties;
@@ -36,36 +35,44 @@ public class TokenProvider {
     	
     	return Jwts.builder()
     			.setSubject(Long.toString(userPrincipal.getId()))
+    			.claim(CLAIM_KEY, userPrincipal.getProvider())
     			.setIssuedAt(new Date())
     			.setExpiration(expiryDate)
     			.signWith(SignatureAlgorithm.HS512, appProperties.getAuth().getTokenSecret())
     			.compact();
     }
     
-    public String createToken(Authentication authentication) {
-
-    	System.out.println("TokenProvider createToken!!");
-    	System.out.println(authentication.toString());
-    	UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+    public Long getIdFromToken(String token) {
     	
-    	Date now = new Date();
-    	Date expiryDate = new Date(now.getTime() + appProperties.getAuth().getTokenExpirationMsec());
-    	
-    	return Jwts.builder()
-    			.setSubject(Long.toString(userPrincipal.getId()))
-    			.setIssuedAt(new Date())
-    			.setExpiration(expiryDate)
-    			.signWith(SignatureAlgorithm.HS512, appProperties.getAuth().getTokenSecret())
-    			.compact();
+    	try {
+    		
+    		Claims claims = Jwts.parser()
+				.setSigningKey(appProperties.getAuth().getTokenSecret())
+				.parseClaimsJws(token)
+				.getBody();
+    		
+    		return Long.parseLong(claims.getSubject());
+    	} 
+    	catch(Exception e) {
+    		log.error("token get id failure ", e);
+    		throw e;
+    	}
     }
+    
+    public String getProviderFromToken(String token) {
 
-    public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(appProperties.getAuth().getTokenSecret())
-                .parseClaimsJws(token)
-                .getBody();
-
-        return Long.parseLong(claims.getSubject());
+    	try {
+    		
+			Claims claims = Jwts.parser()
+				.setSigningKey(appProperties.getAuth().getTokenSecret())
+				.parseClaimsJws(token)
+				.getBody();
+			return claims.get(CLAIM_KEY).toString();
+    	} 
+    	catch(Exception e) {
+    		log.error("token get id failure ", e);
+    		throw e;
+    	}
     }
 
     public boolean validateToken(String authToken) {
@@ -73,15 +80,15 @@ public class TokenProvider {
             Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException ex) {
-            logger.error("Invalid JWT signature");
+            log.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
+            log.error("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token");
+            log.error("Expired JWT token");
         } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token");
+            log.error("Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty.");
+            log.error("JWT claims string is empty.");
         }
         return false;
     }

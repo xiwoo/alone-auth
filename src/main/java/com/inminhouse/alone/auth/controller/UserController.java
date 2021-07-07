@@ -22,7 +22,6 @@ public class UserController {
     @GetMapping("/me")
     @PreAuthorize("hasRole('USER')")
     public User getCurrentUser(@AuthenticationPrincipal UserPrincipal principal) {
-    	
 
         return userRepository.findById(principal.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", principal.getId()));

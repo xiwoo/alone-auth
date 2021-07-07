@@ -10,7 +10,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import com.inminhouse.alone.auth.config.security.oauth2.user.UserStatus;
+import com.inminhouse.alone.auth.config.security.oauth2.user.UserLoginStatus;
+import com.inminhouse.alone.auth.model.Auth;
 import com.inminhouse.alone.auth.model.User;
 
 import lombok.Getter;
@@ -21,26 +22,32 @@ import lombok.ToString;
 public class UserPrincipal implements OAuth2User, UserDetails {
 	
 	private Long id;
-	private String email;
+	private String authId;
+	private String provider;
+	private String name;
 	private String password;
 	private Collection<? extends GrantedAuthority> authorities;
 	private Map<String, Object> attributes;
-	private UserStatus status;
+	private UserLoginStatus status;
 	
-	public UserPrincipal(Long id, String email, String password, Collection<? extends GrantedAuthority> authorities, UserStatus status) {
+	public UserPrincipal(Long id, String authId, String provider, String name, String password, Collection<? extends GrantedAuthority> authorities, UserLoginStatus status) {
 		this.id = id;
-		this.email = email;
+		this.authId = authId;
+		this.provider = provider;
+		this.name = name;
 		this.password = password;
 		this.authorities = authorities;
 		this.status = status;
 	}
 	
-	public static UserPrincipal create(User user, UserStatus status) {
+	public static UserPrincipal create(User user, Auth auth, UserLoginStatus status) {
 		List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 		
 		return new UserPrincipal(
 			user.getId(),
-			user.getEmail(),
+			auth.getId(),
+			auth.getProvider().toString(),
+			user.getName(),
 			user.getPassword(),
 			authorities,
 			status
@@ -49,7 +56,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 	
 	@Override
 	public String getUsername() {
-		return email;
+		return authId;
 	}
 
 	@Override
@@ -70,11 +77,6 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return true;
-	}
-
-	@Override
-	public String getName() {
-		return String.valueOf(id);
 	}
 
 }

@@ -21,12 +21,18 @@ import com.inminhouse.alone.auth.config.security.UserPrincipal;
 import com.inminhouse.alone.auth.config.security.utils.CookieUtils;
 import com.inminhouse.alone.auth.exception.BadRequestException;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 	
 	private TokenProvider tokenProvider;
 	private AppProperties appProperties;
 	private HttpCookieAuthorizationRequestRepository httpCookieAuthorizationRequestRepository;
+	
+	private static final String QUERYPARAM_TOKEN = "token";
+	private static final String QUERYPARAM_STATUS = "status";
 	
 	@Autowired
 	OAuth2AuthenticationSuccessHandler(TokenProvider tokenProvider, AppProperties appProperties, HttpCookieAuthorizationRequestRepository httpCookieAuthorizationRequestRepository) {
@@ -59,7 +65,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 		UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
 		
         Optional<String> redirectUri = CookieUtils.getCookie(request, HttpCookieAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
-                .map(Cookie::getValue);
+            .map(Cookie::getValue); 
         
         //cookie에 redirectUri가 등록 되어있고, appProperties에 허가하기로 했던 redirectUri가 아니면
         if(redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
@@ -68,10 +74,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
 
+        log.debug("UserPrincipal:: ", principal.toString());
+        log.debug("redirectUri:: ", redirectUri);
+        
         String token = tokenProvider.createToken(principal);
 
         return UriComponentsBuilder.fromUriString(targetUrl)
-                .queryParam("token", token).queryParam("status", principal.getStatus().getStatus())
+                .queryParam(QUERYPARAM_TOKEN, token).queryParam(QUERYPARAM_STATUS, principal.getStatus().getStatus())
                 .build().toUriString();
     }
 	

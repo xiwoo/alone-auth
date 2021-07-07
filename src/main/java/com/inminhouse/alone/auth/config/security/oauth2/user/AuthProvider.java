@@ -1,4 +1,4 @@
-package com.inminhouse.alone.auth.model;
+package com.inminhouse.alone.auth.config.security.oauth2.user;
 
 public enum AuthProvider {
 	
