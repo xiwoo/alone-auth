@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.inminhouse.alone.auth.exception.OAuth2AuthenticationProcessingException;
-import com.inminhouse.alone.auth.model.AuthProvider;
 
 public class OAuth2UserInfoFactory {
 

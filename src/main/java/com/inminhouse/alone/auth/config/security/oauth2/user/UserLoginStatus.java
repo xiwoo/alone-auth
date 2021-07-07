@@ -1,17 +1,18 @@
 package com.inminhouse.alone.auth.config.security.oauth2.user;
 
-public enum UserStatus {
+import lombok.Getter;
+
+@Getter
+public enum UserLoginStatus {
 	
-	NEW("N"), EXIST("E");
+	NEW("N"), 
+	EXIST("E")
+	;
 	
 	private final String status;
 	 
-	UserStatus(String status) {
+	UserLoginStatus(final String status) {
 		this.status = status;
-	}
-	
-	public String getStatus() {
-		return status;
 	}
 	
 }

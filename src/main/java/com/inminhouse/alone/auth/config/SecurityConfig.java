@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.inminhouse.alone.auth.config.security.LoggingHttpFirewall;
 import com.inminhouse.alone.auth.config.security.RestAuthenticationEntryPoint;
 import com.inminhouse.alone.auth.config.security.TokenAuthenticationFilter;
 import com.inminhouse.alone.auth.config.security.oauth2.HttpCookieAuthorizationRequestRepository;
@@ -30,6 +32,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
     
     @Override
+    public final void configure(WebSecurity web) throws Exception {
+    	super.configure(web);
+    	web.httpFirewall(new LoggingHttpFirewall());
+    }
+    
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
     	
     	http
@@ -37,7 +45,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     		.csrf().and()
     		.formLogin().disable()
     		.httpBasic().disable()
-    		.exceptionHandling().authenticationEntryPoint(new RestAuthenticationEntryPoint()).and()
+    		.exceptionHandling()
+    			.authenticationEntryPoint(new RestAuthenticationEntryPoint()).and()
     		.authorizeRequests()
 //	            .antMatchers("/",
 //                    "/error",

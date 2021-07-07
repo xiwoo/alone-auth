@@ -1,9 +1,16 @@
 
 logging:
   level:
-    org.hibernate.type: trace
-    org.springframework.web.client: DEBUG
-    httpclient.wire: DEBUG
+    com: 
+      inminhouse: DEBUG
+    org:
+      hibernate:
+        type: TRACE
+      springframework:
+        web:
+          client: DEBUG
+    httpclient:
+      wire: DEBUG
 
 server:
   tomcat:
