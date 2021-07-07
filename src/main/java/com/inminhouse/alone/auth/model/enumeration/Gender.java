@@ -5,14 +5,15 @@ import lombok.Getter;
 @Getter
 public enum Gender {
 	
+	NONE(null),
 	GENDERLESS(0),
 	MAN(1),
 	WOMAN(2)
 	;
 	
-	private int value;
+	private Integer value;
 	
-	Gender(int value) {
+	Gender(Integer value) {
 		this.value = value;
 	}
 }

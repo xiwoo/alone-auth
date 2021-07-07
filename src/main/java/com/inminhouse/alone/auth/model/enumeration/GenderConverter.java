@@ -8,7 +8,7 @@ public class GenderConverter implements AttributeConverter<Gender, Integer> {
 
     @Override
     public Integer convertToDatabaseColumn(Gender gender) {
-        return gender.getValue();
+        return gender == null ? null : gender.getValue();
     }
 
     @Override
