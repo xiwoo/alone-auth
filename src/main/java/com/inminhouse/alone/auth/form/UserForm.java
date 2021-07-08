@@ -7,9 +7,11 @@ import com.inminhouse.alone.auth.model.User;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class UserForm {
 	
 	private String name;
